@@ -1,0 +1,1 @@
+This code creates a database named "Player.db" in which it has a loop that asks the user to input the name of the players and adds them to the database and assigning them a random 8 digit ID. At the end of the code, it will display the players in the database with their respective ID. Currently it adds 2 players but it doesn't clear the database after the usage.
