@@ -2,20 +2,6 @@ import sqlite3
 import os
 import random
 
-def initialize_database():
-    conn = sqlite3.connect('Players.db')
-    cursor = conn.cursor()
-
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            name TEXT NOT NULL,
-            numberid INTEGER
-        )
-    ''')
-
-    conn.commit()
-    conn.close()
-
 def add_players(name):
     conn = sqlite3.connect('Players.db')
     cursor = conn.cursor()
@@ -40,3 +26,4 @@ def clear_all_players():
 
     conn.commit()
     conn.close()
+
