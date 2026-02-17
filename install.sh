@@ -17,35 +17,6 @@ python3 -m pip install -r requirements.txt
 echo "Starting PostgreSQL service..."
 sudo service postgresql start
 
-echo "Setting up database..."
-
-sudo -u postgres psql <<EOF
-
--- Create user if it doesn't exist
-DO \$\$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'student') THEN
-      CREATE ROLE student LOGIN PASSWORD 'student';
-   END IF;
-END
-\$\$;
-
---Create database (may error if it already exists, but we can ignore that)
-CREATE DATABASE photon;
-
--- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE photon TO student;
-
-\c photon;
-
--- Create table if it doesn't exist
-CREATE TABLE IF NOT EXISTS players (
-    id INT PRIMARY KEY
-    codename TEXT
-);
-
-EOF
-
 echo "Install complete!"
 echo "Run the application with:"
 echo "python3 -m photon_app.main"
