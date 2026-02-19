@@ -19,12 +19,13 @@ def add_players(name):
     return numberid
 
 def clear_all_players():
-    conn = sqlite3.connect('Players.db')
+    conn = sqlite3.connect('photon.db')
     cursor = conn.cursor()
 
     cursor.execute('DELETE FROM users')
 
     conn.commit()
     conn.close()
+
 
 
