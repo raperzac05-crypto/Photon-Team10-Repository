@@ -4,7 +4,7 @@ import psycopg2
 # -------------------------------
 # Database connection
 # -------------------------------
-connection = psycopg2.connect(dbname="photon", host="/var/run/postgresql")
+connection = psycopg2.connect(dbname="photon")
 cursor = connection.cursor()
 
 def get_codename(player_id):
@@ -285,3 +285,4 @@ pygame.quit()
 cursor.close()
 
 connection.close()
+
