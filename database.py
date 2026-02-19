@@ -3,7 +3,7 @@ import os
 import random
 
 def add_players(name):
-    conn = sqlite3.connect('Players.db')
+    conn = sqlite3.connect('photon.db')
     cursor = conn.cursor()
 
     numberid = random.randint(10000000, 99999999)
@@ -26,4 +26,5 @@ def clear_all_players():
 
     conn.commit()
     conn.close()
+
 
