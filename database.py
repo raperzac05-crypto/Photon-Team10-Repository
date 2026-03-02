@@ -1,22 +1,17 @@
 import sqlite3
 import os
-import random
 
 def add_players(name):
     conn = sqlite3.connect('photon.db')
     cursor = conn.cursor()
 
-    numberid = random.randint(10000000, 99999999)
-
     cursor.execute('''
-        INSERT INTO users (name, numberid)
-        values (?,?)
-    ''', (name, numberid))
+        INSERT INTO users (name)
+        values (?)
+    ''', (name,))
 
     conn.commit()
     conn.close()
-
-    return numberid
 
 def clear_all_players():
     conn = sqlite3.connect('photon.db')
@@ -26,6 +21,3 @@ def clear_all_players():
 
     conn.commit()
     conn.close()
-
-
-
