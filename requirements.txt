@@ -1,2 +1,2 @@
-pygame
-psycopg2-binary
+pygame==2.6.1
+psycopg2-binary==2.9.11
