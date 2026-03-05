@@ -1,11 +1,14 @@
 import pygame
 import psycopg2
+import time
 
 # -------------------------------
 # Database connection
 # -------------------------------
 connection = psycopg2.connect(dbname="photon")
 cursor = connection.cursor()
+countdown_time = 10
+countdown_start = None
 
 def get_codename(player_id):
     if not player_id.strip():
@@ -158,6 +161,16 @@ while running:
     draw_input_boxes()
     screen.blit(font.render("TAB=Next | ENTER=Confirm | F3=Start | F12=Clear", True, (255, 255, 255)), (50, 560))
 
+    #Added Timer
+    if countdown_start is not None:
+        elapsed = time.time() - countdown_start
+        seconds_left = max(0, int(countdown_time - elapsed))
+        timer_text = f"00:{seconds_left:02d}"
+        surf = big_font.render(timer_text, True, (240, 240, 255))
+        screen.blit(surf, surf.get_rect(center=(500,300)))
+        if elapsed >= countdown_time:
+            running = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -223,8 +236,8 @@ while running:
                 # This prevents re-fetching codenames from database for IDs already entered
                 print("Data cleared.")
             elif event.key == pygame.K_F3:
-                print("Game starting... players:", players_list)
-                running = False
+                countdown_start = time.time()
+
             elif event.key == pygame.K_TAB:
                 order = ["player_id", "codename", "equipment_id"]
                 idx = order.index(active_field)
@@ -285,4 +298,3 @@ pygame.quit()
 cursor.close()
 
 connection.close()
-
