@@ -42,6 +42,10 @@ def main() -> None:
     if entry_script.exists():
         run_script(entry_script, chdir=app_dir)
 
+    play_action_script = app_dir / "play-action-display.py"
+    if play_action_script.exists():
+        run_script(play_action_script, chdir=app_dir)
+
 #run the main function if this file is executed as the main program
 if __name__ == "__main__":
     main()
