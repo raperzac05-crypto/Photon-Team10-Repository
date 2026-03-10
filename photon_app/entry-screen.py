@@ -236,7 +236,8 @@ while running:
                 # This prevents re-fetching codenames from database for IDs already entered
                 print("Data cleared.")
             elif event.key == pygame.K_F3:
-                countdown_start = time.time()
+                print("Game starting... players:", players_list)
+                running = False
 
             elif event.key == pygame.K_TAB:
                 order = ["player_id", "codename", "equipment_id"]
@@ -298,6 +299,7 @@ pygame.quit()
 cursor.close()
 
 connection.close()
+
 
 
 
