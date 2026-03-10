@@ -7,7 +7,7 @@ import time
 # -------------------------------
 connection = psycopg2.connect(dbname="photon")
 cursor = connection.cursor()
-countdown_time = 30
+countdown_time = 10
 countdown_start = None
 
 def get_codename(player_id):
@@ -169,7 +169,8 @@ while running:
         surf = big_font.render(timer_text, True, (240, 240, 255))
         screen.blit(surf, surf.get_rect(center=(500,300)))
         if elapsed >= countdown_time:
-            running = False
+            if countdown_start is not None:
+                countdown_start = time.time()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -298,4 +299,5 @@ pygame.quit()
 cursor.close()
 
 connection.close()
+
 
