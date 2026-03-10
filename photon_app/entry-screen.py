@@ -169,7 +169,7 @@ while running:
         surf = big_font.render(timer_text, True, (240, 240, 255))
         screen.blit(surf, surf.get_rect(center=(500,300)))
         if elapsed >= countdown_time:
-            running = false
+            running = False
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -300,6 +300,7 @@ pygame.quit()
 cursor.close()
 
 connection.close()
+
 
 
 
