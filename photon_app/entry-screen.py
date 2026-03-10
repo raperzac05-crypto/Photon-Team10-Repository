@@ -7,7 +7,7 @@ import time
 # -------------------------------
 connection = psycopg2.connect(dbname="photon")
 cursor = connection.cursor()
-countdown_time = 10
+countdown_time = 30
 countdown_start = None
 
 def get_codename(player_id):
@@ -298,3 +298,4 @@ pygame.quit()
 cursor.close()
 
 connection.close()
+
