@@ -237,7 +237,8 @@ while running:
                 print("Data cleared.")
             elif event.key == pygame.K_F3:
                 print("Game starting... players:", players_list)
-                running = False
+                if countdown_start is None:
+                    countdown_start = time.time()
 
             elif event.key == pygame.K_TAB:
                 order = ["player_id", "codename", "equipment_id"]
@@ -299,6 +300,7 @@ pygame.quit()
 cursor.close()
 
 connection.close()
+
 
 
 
