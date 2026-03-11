@@ -60,7 +60,8 @@ clock = pygame.time.Clock()
 return_button = pygame.Rect(300, 540, 300, 40)
 show_return = False
 
-while True:
+running = True
+while running:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -70,21 +71,8 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if show_return and return_button.collidepoint(event.pos):
                 # Clear game data file and return to entry screen
-                pygame.quit()
-
-                import runpy
-                import os
-
-                app_dir = Path(__file__).resolve().parent
-                old_cwd = Path.cwd()
-
-                try:
-                    os.chdir(app_dir)
-                    runpy.run_path(str(app_dir / "entry-screen.py"), run_name="__main__")
-                finally:
-                    os.chdir(old_cwd)
-                
-                sys.exit()
+                running = False
+                next_screen = "entry"
 
     screen.fill(BLACK)  # orange/yellow background
 
@@ -141,3 +129,7 @@ while True:
 
     pygame.display.flip()
     clock.tick(60)
+
+next_file = Path(__file__).resolve().parent / "next_screen.txt"
+next_file.write_text(next_screen)
+pygame.quit()
