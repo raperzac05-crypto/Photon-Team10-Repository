@@ -3,6 +3,7 @@ import sys
 import time
 import json
 from pathlib import Path
+from datetime import timedelta
 
 pygame.init()
 
@@ -52,9 +53,12 @@ else:
     actions = []
 
 start_time = time.time()
-game_length = 60
+game_length = 360 
 
 clock = pygame.time.Clock()
+
+return_button = pygame.Rect(300, 540, 300, 40)
+show_return = False
 
 while True:
 
@@ -62,6 +66,25 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if show_return and return_button.collidepoint(event.pos):
+                # Clear game data file and return to entry screen
+                pygame.quit()
+
+                import runpy
+                import os
+
+                app_dir = Path(__file__).resolve().parent
+                old_cwd = Path.cwd()
+
+                try:
+                    os.chdir(app_dir)
+                    runpy.run_path(str(app_dir / "entry-screen.py"), run_name="__main__")
+                finally:
+                    os.chdir(old_cwd)
+                
+                sys.exit()
 
     screen.fill(BLACK)  # orange/yellow background
 
@@ -99,8 +122,22 @@ while True:
 
     # Timer
     remaining = max(0, game_length - int(time.time()-start_time))
-    timer = text_font.render(f"Time Remaining: {remaining}", True, WHITE)
+    time_str = str(timedelta(seconds=remaining))
+    time_str = time_str[-5:]
+    timer = text_font.render(f"Time Remaining: {time_str}", True, WHITE)
     screen.blit(timer,(600,520))
+
+    # Return button
+    if show_return:
+        pygame.draw.rect(screen, BLUE, return_button, border_radius=8)
+        pygame.draw.rect(screen, WHITE, return_button, 2, border_radius=8)
+        button_text = header_font.render("Return to Entry Screen", True, WHITE)
+        text_rect = button_text.get_rect(center=return_button.center)
+        screen.blit(button_text, text_rect)
+
+    #return to entry screen after time runs out
+    if remaining == 0:
+        show_return = True
 
     pygame.display.flip()
     clock.tick(60)
