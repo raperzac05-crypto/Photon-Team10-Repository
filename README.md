@@ -15,6 +15,7 @@ This project is a laser tag player entry system. It includes:
 
 	-Splash screen display
 	-Player entry screen
+	-Play action screen
 	-Database integration
 	-UDP socket communication
 
@@ -23,6 +24,8 @@ This project is a laser tag player entry system. It includes:
 The following are required to run this project:
 
 	-Python 3.x
+	-pygame 2.6.1
+	-psycopg2-binary 2.9.11
 	-PostgreSQL
 
 ## Setup Instructions
@@ -34,4 +37,5 @@ chmod +x install.sh
 ./install.sh
 
 To run the App:
+
 python3 -m photon_app.main
