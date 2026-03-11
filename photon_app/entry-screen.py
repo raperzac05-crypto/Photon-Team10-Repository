@@ -7,7 +7,7 @@ import time
 # -------------------------------
 connection = psycopg2.connect(dbname="photon")
 cursor = connection.cursor()
-countdown_time = 10
+countdown_time = 30
 countdown_start = None
 
 def get_codename(player_id):
@@ -296,10 +296,27 @@ while running:
 
     pygame.display.flip()
 
+#save player data for the play-action-display
+import json
+from pathlib import Path
+
+red_team = [p for p in players_list if p["team"] == "red"]
+green_team = [p for p in players_list if p["team"] == "green"]
+game_data = {
+    "red_team": red_team,
+    "green_team": green_team,
+    "actions": []  # This will be populated by the play-action-display
+}
+data_file = Path(__file__).resolve().parent / "game_data.json"
+
+with open(data_file, "w") as f:
+    json.dump(game_data, f, indent=2)
+
 pygame.quit()
 cursor.close()
 
 connection.close()
+
 
 
 
