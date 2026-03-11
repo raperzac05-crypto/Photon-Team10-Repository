@@ -1,14 +1,19 @@
 import pygame
 import psycopg2
 import time
+import json
+from pathlib import Path
 
 # -------------------------------
 # Database connection
 # -------------------------------
+
+#take out the host part, don't think it's needed
 connection = psycopg2.connect(dbname="photon")
+
 cursor = connection.cursor()
-countdown_time = 30
 countdown_start = None
+countdown_time = 30  # seconds
 
 def get_codename(player_id):
     if not player_id.strip():
@@ -67,6 +72,23 @@ active_field = "player_id"
 input_text = ""
 player_data = {}
 players_list = []
+#not sure if nessary but added ability to read game data from file in case we want to save players
+data_file = Path(__file__).resolve().parent / "game_data.json"
+
+if data_file.exists():
+    with open(data_file, "r") as f:
+        game_data = json.load(f)
+    
+    #rebuild teams
+    for p in game_data.get("red_team", []):
+        p["team"] = "red"
+        players_list.append(p)
+
+    for p in game_data.get("green_team", []):
+        p["team"] = "green"
+        players_list.append(p)
+
+
 entered_player_ids = set()  # Track IDs entered in this session
 MAX_PLAYERS_PER_TEAM = 15
 next_team = "red"  # alternates between "red" and "green"
@@ -160,6 +182,7 @@ while running:
     draw_team_table(550, (50, 255, 50), "Green Team")
     draw_input_boxes()
     screen.blit(font.render("TAB=Next | ENTER=Confirm | F3=Start | F12=Clear", True, (255, 255, 255)), (50, 560))
+    
 
     #Added Timer
     if countdown_start is not None:
@@ -169,6 +192,8 @@ while running:
         surf = big_font.render(timer_text, True, (240, 240, 255))
         screen.blit(surf, surf.get_rect(center=(500,300)))
         if elapsed >= countdown_time:
+            next_file = Path(__file__).resolve().parent / "next_screen.txt"
+            next_file.write_text("play")
             running = False
 
     for event in pygame.event.get():
@@ -223,7 +248,7 @@ while running:
         # Key handling
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                running = False
+                raise SystemExit
             elif event.key == pygame.K_F12:
                 players_list = []
                 player_data = {}
@@ -239,7 +264,6 @@ while running:
                 print("Game starting... players:", players_list)
                 if countdown_start is None:
                     countdown_start = time.time()
-
             elif event.key == pygame.K_TAB:
                 order = ["player_id", "codename", "equipment_id"]
                 idx = order.index(active_field)
@@ -297,11 +321,9 @@ while running:
     pygame.display.flip()
 
 #save player data for the play-action-display
-import json
-from pathlib import Path
-
 red_team = [p for p in players_list if p["team"] == "red"]
 green_team = [p for p in players_list if p["team"] == "green"]
+
 game_data = {
     "red_team": red_team,
     "green_team": green_team,
@@ -314,12 +336,4 @@ with open(data_file, "w") as f:
 
 pygame.quit()
 cursor.close()
-
 connection.close()
-
-
-
-
-
-
-
