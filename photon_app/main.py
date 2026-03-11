@@ -27,24 +27,58 @@ def run_script(script_name: Path, chdir: Path | None = None) -> None:
     finally:
         os.chdir(old_cwd)
 
+#resets game_data.json when program is first ran
+def reset_game_data(app_dir: Path) -> None:
+    data_file = app_dir / "game_data.json"
+    if data_file.exists():
+        data_file.unlink()
+
+#writes the name of the next screen to a text file, this is used for the play-action-display to know when to return to the entry screen
+def write_next_screen(app_dir: Path, screen_name: str) -> None:
+    next_file = app_dir / "next_screen.txt"
+    next_file.write_text(screen_name)
+
+#reads the name of the next screen from a text file, this is used for the play-action-display to know when to return to the entry screen
+def read_next_screen(app_dir: Path, default: str = "quit") -> None:
+    next_file = app_dir / "next_screen.txt"
+    if next_file.exists():
+        return next_file.read_text().strip()
+    return default
+
 #main function to run the splash screen and entry point, and print the final roster of players
 def main() -> None:
     app_dir = Path(__file__).resolve().parent
     assets_dir = app_dir / "assets"
 
     load_sockets_module(app_dir)
+    reset_game_data(app_dir)
 
     splash_script = app_dir / "splash-screen.py"
     if splash_script.exists():
         run_script(splash_script, chdir=assets_dir)
     
-    entry_script = app_dir / "entry-screen.py"
-    if entry_script.exists():
-        run_script(entry_script, chdir=app_dir)
+    current_screen = "entry"
 
-    play_action_script = app_dir / "play-action-display.py"
-    if play_action_script.exists():
-        run_script(play_action_script, chdir=app_dir)
+    #added loop to check which script to run instead of a hardcoded sequence
+    while True:
+        #entry-screen.py
+        if current_screen == "entry":
+            write_next_screen(app_dir, "quit")
+            entry_script = app_dir / "entry-screen.py"
+            if entry_script.exists():
+                run_script(entry_script, chdir=assets_dir)
+            current_screen = read_next_screen(app_dir)
+        
+        #play-action-display.py
+        elif current_screen == "play":
+            write_next_screen(app_dir, "quit")
+            play_action_script = app_dir / "play-action-display.py"
+            if play_action_script.exists():
+                run_script(play_action_script, chdir=assets_dir)
+            current_screen = read_next_screen(app_dir)
+
+        else:
+            break
 
 #run the main function if this file is executed as the main program
 if __name__ == "__main__":
