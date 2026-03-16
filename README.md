@@ -39,3 +39,4 @@ chmod +x install.sh
 To run the App:
 
 python3 -m photon_app.main
+*Note* On the player entry screen for some machines, holding fn + f3 or f12 is required
