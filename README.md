@@ -1,4 +1,4 @@
-# Photon Team 10 - Sprint 2
+# Photon Team 10 - Sprint 4
 
 ## Team Members
 
@@ -16,6 +16,8 @@ This project is a laser tag player entry system. It includes:
 	-Splash screen display
 	-Player entry screen
 	-Play action screen
+	-Random sound track selection
+	-Event simulation
 	-Database integration
 	-UDP socket communication
 
@@ -38,5 +40,11 @@ chmod +x install.sh
 
 To run the App:
 
-python3 -m photon_app.main
+python3 main.py
+
+After you have entered all information for two players per team,
+in a seperate terminal, run python_trafficgenarator_v2 and enter the
+hardware ID's for those players. After you get the "waiting for start
+from game software" message, use F3 to start the game.
+
 *Note* On the player entry screen for some machines, holding fn + f3 or f12 is required
