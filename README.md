@@ -44,7 +44,7 @@ python3 main.py
 
 After you have entered all information for two players per team,
 in a seperate terminal, run python_trafficgenarator_v2 and enter the
-hardware ID's for those players. After you get the "waiting for start
+hardware IDs for those players. After you get the "waiting for start
 from game software" message, use F3 to start the game.
 
 *Note* On the player entry screen for some machines, holding fn + f3 or f12 is required
