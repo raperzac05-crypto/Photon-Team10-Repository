@@ -1,0 +1,21 @@
+Under pygame.display.set_caption("Game Action Screen"):
+
+BASE_ICON_PATH = Path(__file__).resolve().parent / "assets" / "baseicon.jpg"
+
+base_icon = pygame.image.load(str(BASE_ICON_PATH)).convert_alpha()
+base_icon = pygame.transform.smoothscale(base_icon, (20, 20))
+
+In the scoring variables:
+base_hit_players = set()
+
+Under update_score in the base section of process_network_events():
+base_hit_players.add(attack["codename"])
+
+under text = text_font.render(f"{name}   {score}", True, WHITE) for drawing both teams:
+
+icon_x = 500
+text_x = 530 if name in base_hit_players else 500
+
+if name in base_hit_players:
+	screen.blit(base_icon, (icon_x, y))
+screen.blit(text,(text_x, y)
