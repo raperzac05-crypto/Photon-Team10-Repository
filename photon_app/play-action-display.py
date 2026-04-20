@@ -19,7 +19,10 @@ WIDTH, HEIGHT = 900, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Game Action Screen")
 
+BASE_ICON_PATH = Path(__file__).resolve().parent / "assets" / "baseicon.jpg"
 
+base_icon = pygame.image.load(str(BASE_ICON_PATH)).convert_alpha()
+base_icon = pygame.transform.smoothscale(base_icon, (20, 20))
 
 # Fonts
 title_font = pygame.font.SysFont("arial", 48)
@@ -36,6 +39,7 @@ GOLD = (255,215,0)
 GREEN = (0,150,0)
 
 #scoring
+base_hit_players = set()
 HIT_POINTS = 10
 BASE_HIT_POINTS = 100
 
@@ -248,6 +252,8 @@ def process_network_events():
                 continue
             update_score(attacker, BASE_HIT_POINTS)
             
+            base_hit_players.add(attacker["codename"])
+            
             add_action(f"{attacker['codename']} hit the {base_team} base! {BASE_HIT_POINTS} points.")
             transmit_socket.sendto(str(attacker_id).encode("utf-8"), ("127.0.0.1", 7500))
 
@@ -323,7 +329,12 @@ while running:
         y = 170 + i*30
         
         text = text_font.render(f"{name}   {score}", True, WHITE)
+        icon_x = 100
+        text_x = 130 if name in base_hit_players else 100
 
+        if name in base_hit_players:
+            screen.blit(base_icon, (icon_x, y))
+        screen.blit(text,(text_x, y))
         text_x = 100
 
         screen.blit(text,(text_x,y))
@@ -334,6 +345,12 @@ while running:
         y = 170 + i*30
 
         text = text_font.render(f"{name}   {score}", True, WHITE)
+        icon_x = 500
+        text_x = 530 if name in base_hit_players else 500
+
+        if name in base_hit_players:
+            screen.blit(base_icon, (icon_x, y))
+        screen.blit(text,(text_x, y))
         
         text_x = 500
 
@@ -389,3 +406,4 @@ next_file.write_text(next_screen)
 
 close_sockets(transmit_socket, receive_socket)
 pygame.quit()
+
