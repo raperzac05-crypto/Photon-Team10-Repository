@@ -334,10 +334,8 @@ while running:
 
         if name in base_hit_players:
             screen.blit(base_icon, (icon_x, y))
+            
         screen.blit(text,(text_x, y))
-        text_x = 100
-
-        screen.blit(text,(text_x,y))
 
     # Green team player
     sorted_green = sorted(green_team.items(), key=lambda x: x[1], reverse=True)
@@ -350,11 +348,8 @@ while running:
 
         if name in base_hit_players:
             screen.blit(base_icon, (icon_x, y))
+            
         screen.blit(text,(text_x, y))
-        
-        text_x = 500
-
-        screen.blit(text,(text_x,y))
 
     # Action log box
     pygame.draw.rect(screen, BLUE, (50,300,800,200))
