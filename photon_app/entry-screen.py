@@ -1,8 +1,25 @@
 import pygame
 import psycopg2
+import sys
+import random
 import time
 import json
 from pathlib import Path
+
+pygame.mixer.pre_init(44100, -16, 2, 4096)
+
+TRACK_DIR = Path(__file__).resolve().parent / "assets" / "photon_tracks"
+
+tracks = list(TRACK_DIR.glob("*.mp3"))
+
+if not tracks:
+    raise RuntimeError("No music tracks found in", TRACK_DIR)
+
+MUSIC_PATH = random.choice(tracks)
+print("Selected music track:", MUSIC_PATH)
+
+sys.path.append(str(Path(__file__).resolve().parent))  # Ensure current directory is in path for sockets import
+from sockets import broadcast_message, create_udp_sockets
 
 # -------------------------------
 # Database connection
@@ -14,6 +31,8 @@ connection = psycopg2.connect(dbname="photon")
 cursor = connection.cursor()
 countdown_start = None
 countdown_time = 30  # seconds
+music_start_time = None
+music_started = False
 
 def get_codename(player_id):
     if not player_id.strip():
@@ -49,15 +68,37 @@ def add_player(player_id, codename):
         )
     connection.commit()
 
+def broadcast_hardware_ids():
+    # This function would contain the logic to send hardware IDs to the play-action-display
+    # For example, it could write them to a file or send them over a socket
+    for player in players_list:
+        hw_id = player.get("equipment_id")
+        if hw_id:
+            broadcast_message(transmit_socket, str(hw_id))
+            print(f"Broadcasted {hw_id}")
+
+def start_music():
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.load(str(MUSIC_PATH))
+        pygame.mixer.music.play(0)
+
 # -------------------------------
 # Pygame setup
 # -------------------------------
 pygame.init()
+
+if not pygame.mixer.get_init():
+    pygame.mixer.init()
+
+pygame.mixer.music.load(str(MUSIC_PATH))
+
 screen = pygame.display.set_mode((1000, 600))
 pygame.display.set_caption("Player Entry")
 
 font = pygame.font.Font(None, 32)
 big_font = pygame.font.Font(None, 40)
+
+transmit_socket, receive_socket = create_udp_sockets()
 
 # -------------------------------
 # Input fields
@@ -72,23 +113,7 @@ active_field = "player_id"
 input_text = ""
 player_data = {}
 players_list = []
-#not sure if nessary but added ability to read game data from file in case we want to save players
 data_file = Path(__file__).resolve().parent / "game_data.json"
-
-if data_file.exists():
-    with open(data_file, "r") as f:
-        game_data = json.load(f)
-    
-    #rebuild teams
-    for p in game_data.get("red_team", []):
-        p["team"] = "red"
-        players_list.append(p)
-
-    for p in game_data.get("green_team", []):
-        p["team"] = "green"
-        players_list.append(p)
-
-
 entered_player_ids = set()  # Track IDs entered in this session
 MAX_PLAYERS_PER_TEAM = 15
 next_team = "red"  # alternates between "red" and "green"
@@ -158,6 +183,8 @@ def commit_player():
         # New player - assign to next team
         player_data["team"] = next_team
         players_list.append(player_data.copy())
+        if player_data.get("equipment_id"):
+            broadcast_message(transmit_socket, str(player_data["equipment_id"]))
         # Alternate to the other team
         next_team = "green" if next_team == "red" else "red"
     
@@ -174,6 +201,7 @@ def commit_player():
 # -------------------------------
 # Main loop
 # -------------------------------
+clock = pygame.time.Clock()
 running = True
 while running:
     screen.fill((15, 15, 15))
@@ -182,7 +210,12 @@ while running:
     draw_team_table(550, (50, 255, 50), "Green Team")
     draw_input_boxes()
     screen.blit(font.render("TAB=Next | ENTER=Confirm | F3=Start | F12=Clear", True, (255, 255, 255)), (50, 560))
-    
+
+    #music start timer
+    if music_start_time is not None and not music_started:
+        if time.time() - music_start_time >= 13: # Start music after 14 seconds
+            pygame.mixer.music.play(0)
+            music_started = True
 
     #Added Timer
     if countdown_start is not None:
@@ -261,9 +294,16 @@ while running:
                 # This prevents re-fetching codenames from database for IDs already entered
                 print("Data cleared.")
             elif event.key == pygame.K_F3:
-                print("Game starting... players:", players_list)
-                if countdown_start is None:
-                    countdown_start = time.time()
+            # Signal play-action-display to start
+                missing = [p for p in players_list if not p.get("equipment_id")]
+
+                if missing:
+                    print("Cannot start game. The following players are missing equipment IDs:")
+                else:
+                    print("Game starting... players:", players_list)
+                    if countdown_start is None:
+                        countdown_start = time.time()
+                        music_start_time = time.time()  # Start music timer when game starts
             elif event.key == pygame.K_TAB:
                 order = ["player_id", "codename", "equipment_id"]
                 idx = order.index(active_field)
@@ -287,10 +327,9 @@ while running:
                 if active_field == "player_id":
                     player_data["player_id"] = input_text.strip()
                     # Check if this player ID has been entered before (in session OR in database)
-                    player_id_was_entered = player_data["player_id"] in entered_player_ids or was_manually_entered(player_data["player_id"])
                     # Only auto-fetch codename if: not editing AND never been entered before
-                    if editing_index is None and not player_id_was_entered:
-                        auto_codename = get_codename(input_text.strip())
+                    if editing_index is None:
+                        auto_codename = get_codename(player_data["player_id"])
                         input_text = auto_codename if auto_codename else ""
                     else:
                         auto_codename = None
@@ -300,9 +339,7 @@ while running:
                     player_data["codename"] = input_text.strip()
                     # Only add to database if codename provided and not already in database
                     if player_data["codename"] and player_data.get("player_id"):
-                        existing = get_codename(player_data["player_id"])
-                        if not existing:
-                            add_player(player_data["player_id"], player_data["codename"])
+                        add_player(player_data["player_id"], player_data["codename"])
                     input_text = ""
                     active_field = "equipment_id"
                     auto_codename = None
@@ -319,6 +356,7 @@ while running:
                 input_text += event.unicode
 
     pygame.display.flip()
+    clock.tick(60)  # Limit to 60 FPS
 
 #save player data for the play-action-display
 red_team = [p for p in players_list if p["team"] == "red"]
@@ -334,6 +372,8 @@ data_file = Path(__file__).resolve().parent / "game_data.json"
 with open(data_file, "w") as f:
     json.dump(game_data, f, indent=2)
 
-pygame.quit()
+pygame.display.quit()
 cursor.close()
 connection.close()
+transmit_socket.close()
+receive_socket.close()
