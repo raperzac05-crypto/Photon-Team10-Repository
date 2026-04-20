@@ -43,7 +43,11 @@ To run the App:
 python3 main.py
 
 After you have entered all information for two players per team,
-in a seperate terminal, run python_trafficgenarator_v2 and enter the
+in a seperate terminal, run:
+
+python3 python_trafficgenarator_v2.py
+
+and enter the
 hardware IDs for those players. After you get the "waiting for start
 from game software" message, use F3 to start the game.
 
