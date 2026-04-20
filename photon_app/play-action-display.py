@@ -310,6 +310,8 @@ while running:
         leader = "red"
     elif green_score > red_score:
         leader = "green"
+    elif red_score == green_score:
+        leader = ""
     flash = int(pygame.time.get_ticks() // 400) % 2 == 0
 
     # Headers
