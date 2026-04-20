@@ -19,4 +19,4 @@ sudo service postgresql start
 
 echo "Install complete!"
 echo "Run the application with:"
-echo "python3 -main.py"
+echo "python3 main.py"
